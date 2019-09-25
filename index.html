@@ -265,7 +265,7 @@
                 
               
 
-              <time title="创建时间：2019-09-25 19:28:43 / 修改时间：19:30:27" itemprop="dateCreated datePublished" datetime="2019-09-25T19:28:43+08:00">2019-09-25</time>
+              <time title="创建时间：2019-09-25 19:28:43 / 修改时间：19:47:06" itemprop="dateCreated datePublished" datetime="2019-09-25T19:28:43+08:00">2019-09-25</time>
             </span>
           
             
@@ -292,9 +292,9 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <img src="/2019/09/25/test/09/25/test/1569410931631.png">
+          <img src="/2019/09/25/test/1569410931631.png">
 
-<p><img src="/2019/09/25/test/1569410931631.png" alt></p>
+<p><img src="/1569410931631.png" alt></p>
 
         
       
@@ -399,7 +399,7 @@
 <h3 id="step1-最基本的容器"><a href="#step1-最基本的容器" class="headerlink" title="step1-最基本的容器"></a>step1-最基本的容器</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git checkout origin/step1</span><br></pre></td></tr></table></figure>
 
 <p>IoC最基本的角色有两个：容器（BeanFactory）和Bean本身。<code>BeanDefinition</code>封装了Bean对象。</p>
-<img src="/2019/09/24/Spring框架学习/09/24/Spring框架学习/1569327273103.png">
+<img src="/2019/09/24/Spring框架学习/1569327273103.png">
 
 <h3 id="step2-在工厂中创建bean"><a href="#step2-在工厂中创建bean" class="headerlink" title="step2-在工厂中创建bean"></a>step2-在工厂中创建bean</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git checkout origin/step2</span><br></pre></td></tr></table></figure>
 
@@ -412,7 +412,7 @@
 
 <p>我们需要给BeanFactory传入<code>完整类名</code>和<code>实例名称</code>。这些都可以通过xml文件获取，在step4中完成。还有一个问题就是现在是通过无参构造函数创建的对象，内部成员变量都是null，所以下一步是对成员变量赋值。</p>
 <p>几个类的关系：</p>
-<p><img src="/2019/09/24/Spring框架学习/1569333489062.png" alt></p>
+<p><img src="/Spring%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0/1569333489062.png" alt></p>
 <h3 id="step3-为bean注入属性"><a href="#step3-为bean注入属性" class="headerlink" title="step3-为bean注入属性"></a>step3-为bean注入属性</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git checkout origin/step3</span><br></pre></td></tr></table></figure>
 
 <p>创建两个类，<code>PropertyValue</code>和<code>PropertyValues</code>，前者保存一个字段的名称和对应值，后者有一个集合保存了所有的<code>PropertyValue</code>。每个BeanDefinition有一个<code>PropertyValues</code>。</p>
@@ -444,7 +444,7 @@
 <td>资源加载类，通过getResource()获取一个Resource对象</td>
 </tr>
 </tbody></table>
-<p><img src="/2019/09/24/Spring框架学习/E:%5CBLOG%5Csource_posts%5C1569395738627.png" alt="1569395738627"></p>
+<p><img src="//zcsherrydc.github.io/2019/09/24/Spring框架学习/E:%5CBLOG%5Csource_posts%5C1569395738627.png" alt="1569395738627"></p>
 <p>BeanDefinition</p>
 <table>
 <thead>
@@ -470,9 +470,9 @@
 <td>具体实现了 <code>loadBeanDefinitions()</code> 方法，从 XML 文件中读取类定义</td>
 </tr>
 </tbody></table>
-<p><img src="/2019/09/24/Spring框架学习/E:%5CBLOG%5Csource_posts%5C1569395746874.png" alt="1569395746874"></p>
+<p><img src="//zcsherrydc.github.io/2019/09/24/Spring框架学习/E:%5CBLOG%5Csource_posts%5C1569395746874.png" alt="1569395746874"></p>
 <p>整个读取流程：</p>
-<p><img src="/2019/09/24/Spring框架学习/E:%5CBLOG%5Csource_posts%5C1569395793717.png" alt="1569395793717"></p>
+<p><img src="//zcsherrydc.github.io/2019/09/24/Spring框架学习/E:%5CBLOG%5Csource_posts%5C1569395793717.png" alt="1569395793717"></p>
 <ol>
 <li>new一个<code>ResourceLoader</code>放入<code>XmlBeanDefinition</code>中，通过<code>loadBeanDefinition</code>传入xml文件地址</li>
 </ol>
@@ -489,7 +489,7 @@
 <p>我们定义一个BeanReference来表示这个属性是对另一个Bean的引用。在<code>XMLBeanDefinition</code>的<code>processProperty</code>方法中加入判断。如果是ref，就new一个BeanReference封装到PropertyValue.</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">processProperty</span><span class="params">(Element ele, BeanDefinition beanDefinition)</span> </span>&#123;</span><br><span class="line">        NodeList propertyNode = ele.getElementsByTagName(<span class="string">"property"</span>);</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; propertyNode.getLength(); i++) &#123;</span><br><span class="line">            Node node = propertyNode.item(i);</span><br><span class="line">            <span class="keyword">if</span> (node <span class="keyword">instanceof</span> Element) &#123;</span><br><span class="line">                Element propertyEle = (Element) node;</span><br><span class="line">                String name = propertyEle.getAttribute(<span class="string">"name"</span>);</span><br><span class="line">                String value = propertyEle.getAttribute(<span class="string">"value"</span>);</span><br><span class="line">                <span class="comment">//---------------新加入代码----------------------</span></span><br><span class="line"><span class="comment">//                name对应的是value</span></span><br><span class="line">                <span class="keyword">if</span> (value!=<span class="keyword">null</span> &amp;&amp; value.length()&gt;<span class="number">0</span>) &#123;</span><br><span class="line">                    beanDefinition.getPropertyValues().addPropertyValue(<span class="keyword">new</span> PropertyValue(name, value));</span><br><span class="line">                &#125;<span class="keyword">else</span>&#123;</span><br><span class="line"><span class="comment">//                    name对应的是ref</span></span><br><span class="line">                    String ref=propertyEle.getAttribute(<span class="string">"ref"</span>);</span><br><span class="line">                    <span class="keyword">if</span> (ref == <span class="keyword">null</span> || ref.length() == <span class="number">0</span>) &#123;</span><br><span class="line">                        <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">"Configuration problem: &lt;property&gt; element for property '"</span></span><br><span class="line">                                + name + <span class="string">"' must specify a ref or value"</span>);</span><br><span class="line">                    &#125;</span><br><span class="line">                    BeanReference beanReference = <span class="keyword">new</span> BeanReference(ref);</span><br><span class="line">                    beanDefinition.getPropertyValues().addPropertyValue(<span class="keyword">new</span> PropertyValue(name, beanReference));</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
 
-<p><img src="/2019/09/24/Spring框架学习/E:%5CBLOG%5Csource_posts%5C1569402791468.png" alt="1569402791468"></p>
+<p><img src="//zcsherrydc.github.io/2019/09/24/Spring框架学习/E:%5CBLOG%5Csource_posts%5C1569402791468.png" alt="1569402791468"></p>
 <p>解析完成之后，BeanFactory中只有&lt;String, BeanDefinition&gt;信息，并没有bean实例，即bean为null。</p>
 <p>同时为了解决循环依赖的问题，我们使用懒加载的方式，即在需要使用的时候才创建。如果属性对应的bean找不到，那么就先创建。因为总是先创建后注入，所以不会存在循环依赖的问题。</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//        获取bean</span></span><br><span class="line">        HelloWorldService helloWorldService = (HelloWorldService) beanFactory.getBean(<span class="string">"helloWorldService"</span>);</span><br><span class="line">        helloWorldService.helloWorld();</span><br></pre></td></tr></table></figure>
@@ -500,7 +500,7 @@
 <h3 id="step6-ApplicationContext登场"><a href="#step6-ApplicationContext登场" class="headerlink" title="step6-ApplicationContext登场"></a>step6-ApplicationContext登场</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git checkout origin/step7</span><br></pre></td></tr></table></figure>
 
 <p>现在功能差不多齐全了，但是使用起来比较麻烦，于是引入<code>ApplicationContext</code>接口，并在<code>refresh()</code>方法下进行bean的初始化。</p>
-<p><img src="/2019/09/24/Spring框架学习/E:%5CBLOG%5Csource_posts%5C1569404506979.png" alt="1569404506979"></p>
+<p><img src="//zcsherrydc.github.io/2019/09/24/Spring框架学习/E:%5CBLOG%5Csource_posts%5C1569404506979.png" alt="1569404506979"></p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">ClassPathXmlApplicationContext</span><span class="params">(String configLocation, AbstractBeanFactory beanFactory)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(beanFactory);</span><br><span class="line">        <span class="keyword">this</span>.configLocation = configLocation;</span><br><span class="line">        refresh();</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
 
 <p>所以使用的时候只需要传入xml地址就可以了</p>
