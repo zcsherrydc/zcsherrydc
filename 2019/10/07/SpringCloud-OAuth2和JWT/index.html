@@ -55,23 +55,24 @@
   };
 </script>
 
-  <meta name="description" content="搭建一个oauth服务器，主要是实现服务器的功能，复杂功能后续加上。 使用Spring Initializr新建项目，勾选如下三个选项   pom.xml 1234567891011121314151617181920&amp;lt;dependencies&amp;gt;       &amp;lt;dependency&amp;gt;           &amp;lt;groupId&amp;gt;org.springframework.">
+  <meta name="description" content="搭建一个oauth2服务器，包括认证、授权和资源服务器 本文分为两个部分  第一部分比较简单，将客户端信息和用户信息固定在程序里，令牌存储在内存中 第二部分从数据库读取用户信息，使用jwt生成令牌  一、简化版使用Spring Initializr新建项目，勾选如下三个选项   pom.xml 1234567891011121314151617181920&amp;lt;dependencies&amp;gt;">
 <meta name="keywords" content="SpringCloud">
 <meta property="og:type" content="article">
 <meta property="og:title" content="SpringCloud：OAuth2和JWT">
 <meta property="og:url" content="https://zcsherrydc.github.io/2019/10/07/SpringCloud-OAuth2和JWT/index.html">
 <meta property="og:site_name" content="ZCS的个人博客">
-<meta property="og:description" content="搭建一个oauth服务器，主要是实现服务器的功能，复杂功能后续加上。 使用Spring Initializr新建项目，勾选如下三个选项   pom.xml 1234567891011121314151617181920&amp;lt;dependencies&amp;gt;       &amp;lt;dependency&amp;gt;           &amp;lt;groupId&amp;gt;org.springframework.">
+<meta property="og:description" content="搭建一个oauth2服务器，包括认证、授权和资源服务器 本文分为两个部分  第一部分比较简单，将客户端信息和用户信息固定在程序里，令牌存储在内存中 第二部分从数据库读取用户信息，使用jwt生成令牌  一、简化版使用Spring Initializr新建项目，勾选如下三个选项   pom.xml 1234567891011121314151617181920&amp;lt;dependencies&amp;gt;">
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="https://zcsherrydc.github.io/2019/10/07/SpringCloud-OAuth2和JWT/1570420518382.png">
 <meta property="og:image" content="https://zcsherrydc.github.io/2019/10/07/SpringCloud-OAuth2和JWT/1570432456538.png">
 <meta property="og:image" content="https://zcsherrydc.github.io/2019/10/07/SpringCloud-OAuth2和JWT/1570442575560.png">
 <meta property="og:image" content="https://zcsherrydc.github.io/2019/10/07/SpringCloud-OAuth2和JWT/1570442089823.png">
 <meta property="og:image" content="https://zcsherrydc.github.io/2019/10/07/SpringCloud-OAuth2和JWT/1570442119823.png">
-<meta property="og:updated_time" content="2019-10-07T10:21:26.372Z">
+<meta property="og:image" content="https://zcsherrydc.github.io/2019/10/07/SpringCloud-OAuth2和JWT/1570459537790.png">
+<meta property="og:updated_time" content="2019-10-07T14:47:54.952Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="SpringCloud：OAuth2和JWT">
-<meta name="twitter:description" content="搭建一个oauth服务器，主要是实现服务器的功能，复杂功能后续加上。 使用Spring Initializr新建项目，勾选如下三个选项   pom.xml 1234567891011121314151617181920&amp;lt;dependencies&amp;gt;       &amp;lt;dependency&amp;gt;           &amp;lt;groupId&amp;gt;org.springframework.">
+<meta name="twitter:description" content="搭建一个oauth2服务器，包括认证、授权和资源服务器 本文分为两个部分  第一部分比较简单，将客户端信息和用户信息固定在程序里，令牌存储在内存中 第二部分从数据库读取用户信息，使用jwt生成令牌  一、简化版使用Spring Initializr新建项目，勾选如下三个选项   pom.xml 1234567891011121314151617181920&amp;lt;dependencies&amp;gt;">
 <meta name="twitter:image" content="https://zcsherrydc.github.io/2019/10/07/SpringCloud-OAuth2和JWT/1570420518382.png">
   <link rel="canonical" href="https://zcsherrydc.github.io/2019/10/07/SpringCloud-OAuth2和JWT/">
 
@@ -272,7 +273,7 @@
                 
               
 
-              <time title="创建时间：2019-10-07 18:12:51 / 修改时间：18:21:26" itemprop="dateCreated datePublished" datetime="2019-10-07T18:12:51+08:00">2019-10-07</time>
+              <time title="创建时间：2019-10-07 18:12:51 / 修改时间：22:47:54" itemprop="dateCreated datePublished" datetime="2019-10-07T18:12:51+08:00">2019-10-07</time>
             </span>
           
             
@@ -299,8 +300,13 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>搭建一个oauth服务器，主要是实现服务器的功能，复杂功能后续加上。</p>
-<p>使用Spring Initializr新建项目，勾选如下三个选项</p>
+        <p>搭建一个oauth2服务器，包括认证、授权和资源服务器</p>
+<p>本文分为两个部分</p>
+<ul>
+<li>第一部分比较简单，将客户端信息和用户信息固定在程序里，令牌存储在内存中</li>
+<li>第二部分从数据库读取用户信息，使用jwt生成令牌</li>
+</ul>
+<h2 id="一、简化版"><a href="#一、简化版" class="headerlink" title="一、简化版"></a>一、简化版</h2><p>使用Spring Initializr新建项目，勾选如下三个选项</p>
 <img src="/2019/10/07/SpringCloud-OAuth2和JWT/1570420518382.png">
 
 <p>pom.xml</p>
@@ -317,7 +323,7 @@
 <p>实现了<code>UserDetailsService</code>接口，所以需要实现唯一的方法</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> zcs.oauthserver.service;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.springframework.security.core.authority.SimpleGrantedAuthority;</span><br><span class="line"><span class="keyword">import</span> org.springframework.security.core.userdetails.UserDetails;</span><br><span class="line"><span class="keyword">import</span> org.springframework.security.core.userdetails.UserDetailsService;</span><br><span class="line"><span class="keyword">import</span> org.springframework.security.core.userdetails.UsernameNotFoundException;</span><br><span class="line"><span class="keyword">import</span> org.springframework.stereotype.Service;</span><br><span class="line"><span class="keyword">import</span> zcs.oauthserver.model.UserModel;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.ArrayList;</span><br><span class="line"><span class="keyword">import</span> java.util.List;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Service</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">UserServiceDetail</span> <span class="keyword">implements</span> <span class="title">UserDetailsService</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> UserDetails <span class="title">loadUserByUsername</span><span class="params">(String s)</span> <span class="keyword">throws</span> UsernameNotFoundException </span>&#123;</span><br><span class="line">        List&lt;SimpleGrantedAuthority&gt; authorities = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        authorities.add(<span class="keyword">new</span> SimpleGrantedAuthority(<span class="string">"ROLE"</span>));</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> UserModel(<span class="string">"user"</span>,<span class="string">"user"</span>,authorities);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<p><font color="red">这里先用假参数实现功能，后续添加数据库</font></p>
+<p><font color="red">这里先用假参数实现功能，后面添加数据库</font></p>
 <p>参数s是前端输入的用户名，通过该参数查找数据库，获取密码和角色权限，最后将这三个数据封装到<code>UserDetails</code>接口的实现类中返回。这里封装的类可以使用<code>org.springframework.security.core.userdetails.User</code>或者自己实现<code>UserDetails</code>接口。</p>
 <p><strong>UserModel</strong></p>
 <p>实现<code>UserDetails</code>接口</p>
@@ -364,8 +370,34 @@
 
 <ol start="3">
 <li>访问资源<br>/user/test2是受保护资源，我们通过令牌访问<img src="/2019/10/07/SpringCloud-OAuth2和JWT/1570442119823.png">
+
 </li>
 </ol>
+<h2 id="二、升级版"><a href="#二、升级版" class="headerlink" title="二、升级版"></a>二、升级版</h2><p>有很多人会把JWT和OAuth2来作比较，其实它俩是完全不同的概念，没有可比性。</p>
+<p>JWT是一种认证协议，提供一种用于发布接入令牌、并对发布的签名接入令牌进行验证的方法。</p>
+<p>OAuth2是一种授权框架，提供一套详细的授权机制。</p>
+<p>Spring Cloud OAuth2集成了JWT作为令牌管理，因此使用起来很方便</p>
+<p><code>JwtAccessTokenConverter</code>是用来生成token的转换器，而token令牌默认是有签名的，且资源服务器需要验证这个签名。此处的加密及验签包括两种方式：<br>对称加密、非对称加密（公钥密钥）<br>对称加密需要授权服务器和资源服务器存储同一key值，而非对称加密可使用密钥加密，暴露公钥给资源服务器验签，本文中使用非对称加密方式。</p>
+<p>通过jdk工具生成jks证书，通过cmd进入jdk安装目录的bin下，运行命令</p>
+<p><code>keytool -genkeypair -alias oauth2-keyalg RSA -keypass mypass -keystore oauth2.jks -storepass mypass</code></p>
+<p>会在当前目录生成oauth2.jks文件，放入resource目录下。</p>
+<p>maven默认不加载resource目录下的文件，所以需要在pom.xml中配置，在build下添加配置</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">build</span>&gt;</span></span><br><span class="line">     <span class="tag">&lt;<span class="name">plugins</span>&gt;</span></span><br><span class="line">         <span class="tag">&lt;<span class="name">plugin</span>&gt;</span></span><br><span class="line">             <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">             <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-maven-plugin<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">         <span class="tag">&lt;/<span class="name">plugin</span>&gt;</span></span><br><span class="line">     <span class="tag">&lt;/<span class="name">plugins</span>&gt;</span></span><br><span class="line">     <span class="tag">&lt;<span class="name">resources</span>&gt;</span></span><br><span class="line">         <span class="tag">&lt;<span class="name">resource</span>&gt;</span></span><br><span class="line">             <span class="tag">&lt;<span class="name">directory</span>&gt;</span>src/main/resources<span class="tag">&lt;/<span class="name">directory</span>&gt;</span></span><br><span class="line">             <span class="tag">&lt;<span class="name">includes</span>&gt;</span></span><br><span class="line">                 <span class="tag">&lt;<span class="name">include</span>&gt;</span>**/*.*<span class="tag">&lt;/<span class="name">include</span>&gt;</span></span><br><span class="line">             <span class="tag">&lt;/<span class="name">includes</span>&gt;</span></span><br><span class="line">         <span class="tag">&lt;/<span class="name">resource</span>&gt;</span></span><br><span class="line">     <span class="tag">&lt;/<span class="name">resources</span>&gt;</span></span><br><span class="line"> <span class="tag">&lt;/<span class="name">build</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>在原来的AuthorizationServerConfig中更改部分代码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">	<span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">private</span> TokenStore tokenStore;	</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">configure</span><span class="params">(AuthorizationServerEndpointsConfigurer endpoints)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line"><span class="comment">//        endpoints.tokenStore(tokenStore)</span></span><br><span class="line"><span class="comment">//                .authenticationManager(authenticationManager);</span></span><br><span class="line">        endpoints.authenticationManager(authenticationManager)</span><br><span class="line">                .accessTokenConverter(jwtAccessTokenConverter())</span><br><span class="line">                .tokenStore(tokenStore);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> TokenStore <span class="title">tokenStore</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> JwtTokenStore(jwtAccessTokenConverter());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 非对称加密算法对token进行签名</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> JwtAccessTokenConverter <span class="title">jwtAccessTokenConverter</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">final</span> JwtAccessTokenConverter converter = <span class="keyword">new</span> CustomJwtAccessTokenConverter();</span><br><span class="line">        <span class="comment">// 导入证书</span></span><br><span class="line">        KeyStoreKeyFactory keyStoreKeyFactory =</span><br><span class="line">                <span class="keyword">new</span> KeyStoreKeyFactory(<span class="keyword">new</span> ClassPathResource(<span class="string">"oauth2.jks"</span>), <span class="string">"mypass"</span>.toCharArray());</span><br><span class="line">        converter.setKeyPair(keyStoreKeyFactory.getKeyPair(<span class="string">"oauth2"</span>));</span><br><span class="line">        <span class="keyword">return</span> converter;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>jwtAccessTokenConverter</code>方法中有一个<code>CustomJwtAccessTokenConverter</code>类，这是继承了<code>JwtAccessTokenConverter</code>，自定义添加了额外的token信息</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 自定义添加额外token信息</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CustomJwtAccessTokenConverter</span> <span class="keyword">extends</span> <span class="title">JwtAccessTokenConverter</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> OAuth2AccessToken <span class="title">enhance</span><span class="params">(OAuth2AccessToken accessToken, OAuth2Authentication authentication)</span> </span>&#123;</span><br><span class="line">        DefaultOAuth2AccessToken defaultOAuth2AccessToken = <span class="keyword">new</span> DefaultOAuth2AccessToken(accessToken);</span><br><span class="line">        Map&lt;String, Object&gt; additionalInfo = <span class="keyword">new</span> HashMap&lt;&gt;();</span><br><span class="line">        UserModel user = (UserModel)authentication.getPrincipal();</span><br><span class="line">        additionalInfo.put(<span class="string">"USER"</span>,user);</span><br><span class="line">        defaultOAuth2AccessToken.setAdditionalInformation(additionalInfo);</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">super</span>.enhance(defaultOAuth2AccessToken,authentication);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="测试-1"><a href="#测试-1" class="headerlink" title="测试"></a>测试</h3><p>测试方法和第一部分一样，获取令牌的时候返回如下</p>
+<img src="/2019/10/07/SpringCloud-OAuth2和JWT/1570459537790.png">
+
+
+
+<p><strong>参考链接</strong>：</p>
+<p><a href="https://www.cnblogs.com/fp2952/p/8973613.html" target="_blank" rel="noopener">https://www.cnblogs.com/fp2952/p/8973613.html</a></p>
+<p><a href="https://juejin.im/post/5c5ae6566fb9a049b3486e38" target="_blank" rel="noopener">https://juejin.im/post/5c5ae6566fb9a049b3486e38</a></p>
 
     </div>
 
@@ -454,7 +486,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#配置Spring-Security"><span class="nav-number">1.</span> <span class="nav-text">配置Spring Security</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置Oauth2认证服务器"><span class="nav-number">2.</span> <span class="nav-text">配置Oauth2认证服务器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置资源服务器"><span class="nav-number">3.</span> <span class="nav-text">配置资源服务器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#测试"><span class="nav-number">4.</span> <span class="nav-text">测试</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#一、简化版"><span class="nav-number">1.</span> <span class="nav-text">一、简化版</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#配置Spring-Security"><span class="nav-number">1.1.</span> <span class="nav-text">配置Spring Security</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置Oauth2认证服务器"><span class="nav-number">1.2.</span> <span class="nav-text">配置Oauth2认证服务器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置资源服务器"><span class="nav-number">1.3.</span> <span class="nav-text">配置资源服务器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#测试"><span class="nav-number">1.4.</span> <span class="nav-text">测试</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#二、升级版"><span class="nav-number">2.</span> <span class="nav-text">二、升级版</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#测试-1"><span class="nav-number">2.1.</span> <span class="nav-text">测试</span></a></li></ol></li></ol></div>
         
       </div>
       <!--/noindex-->
