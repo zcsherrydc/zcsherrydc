@@ -67,7 +67,7 @@
 <meta property="og:image" content="https://zcsherrydc.github.io/2019/10/11/SpringCloud-OAuth2实现SSO/1570779361869.png">
 <meta property="og:image" content="https://zcsherrydc.github.io/2019/10/11/SpringCloud-OAuth2实现SSO/1570779411739.png">
 <meta property="og:image" content="https://zcsherrydc.github.io/2019/10/11/SpringCloud-OAuth2实现SSO/1570779295223.png">
-<meta property="og:updated_time" content="2019-10-11T11:14:00.057Z">
+<meta property="og:updated_time" content="2019-10-18T11:53:54.750Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="SpringCloud-OAuth2结合zuul实现SSO">
 <meta name="twitter:description" content="前言爬了两天的坑终于上来了，看别人写的很简单，自己写的时候就各种问题，网上SSO文章很多，写的时候就各种问题（自己太菜了）。记录一下，以后方便查看。 关于OAuth2认证和授权服务器见上一篇 https://zcsherrydc.github.io/2019/10/07/SpringCloud-OAuth2%E5%92%8CJWT/ 项目地址： https://github.com/zcsherr">
@@ -246,7 +246,7 @@
     <link itemprop="mainEntityOfPage" href="https://zcsherrydc.github.io/2019/10/11/SpringCloud-OAuth2实现SSO/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="zcsherry">
+      <meta itemprop="name" content="zcs">
       <meta itemprop="description" content="记录学习java的艰辛历程">
       <meta itemprop="image" content="/images/avatar.jpg">
     </span>
@@ -271,11 +271,19 @@
                 
               
 
-              <time title="创建时间：2019-10-11 14:19:39 / 修改时间：19:14:00" itemprop="dateCreated datePublished" datetime="2019-10-11T14:19:39+08:00">2019-10-11</time>
+              <time title="创建时间：2019-10-11 14:19:39" itemprop="dateCreated datePublished" datetime="2019-10-11T14:19:39+08:00">2019-10-11</time>
             </span>
           
             
 
+            
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2019-10-18 19:53:54" itemprop="dateModified" datetime="2019-10-18T19:53:54+08:00">2019-10-18</time>
+              </span>
             
           
 
@@ -371,13 +379,21 @@
 </ul>
 <p>通过zuul端口访问eureka-client下的方法 <a href="http://localhost:9110/eureka-client/hi" target="_blank" rel="noopener">http://localhost:9110/eureka-client/hi</a></p>
 <p>会自动跳到oauth-server的登陆页面，输入用户名和密码登陆</p>
-<p><img src="//zcsherrydc.github.io/2019/10/11/SpringCloud-OAuth2实现SSO/1570779345082.png" alt="1570779345082"></p>
+<img src="/2019/10/11/SpringCloud-OAuth2实现SSO/1570779345082.png">
+
 <p>看url，跳转到了oauth/authorize，这是授权接口，并且后面携带了一些zuul配置的信息</p>
-<p><img src="//zcsherrydc.github.io/2019/10/11/SpringCloud-OAuth2实现SSO/1570779361869.png" alt="1570779361869"></p>
+<img src="/2019/10/11/SpringCloud-OAuth2实现SSO/1570779361869.png">
+
 <p>成功</p>
-<p><img src="//zcsherrydc.github.io/2019/10/11/SpringCloud-OAuth2实现SSO/1570779411739.png" alt="1570779411739"></p>
+<img src="/2019/10/11/SpringCloud-OAuth2实现SSO/1570779411739.png">
+
+
+
 <p>访问eureka-client1不需要登陆</p>
-<p><img src="//zcsherrydc.github.io/2019/10/11/SpringCloud-OAuth2实现SSO/1570779295223.png" alt="1570779295223"></p>
+<img src="/2019/10/11/SpringCloud-OAuth2实现SSO/1570779295223.png">
+
+
+
 <h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>写的比较简洁，但是做出来真的花费了两天的时间精力(还是太菜了)</p>
 <p>没有什么文采，原理性的东西也写不出来，只能记录一下实践，大家共同交流</p>
 
@@ -387,7 +403,7 @@
     
     
         <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center;">
-  <img id="wechat_subscriber_qcode" src="/images/wechat-qcode.jpg" alt="zcsherry wechat" style="width: 200px; max-width: 100%;">
+  <img id="wechat_subscriber_qcode" src="/images/wechat-qcode.jpg" alt="zcs wechat" style="width: 200px; max-width: 100%;">
   <div>微信扫一扫,手机也能看.</div>
 </div>
 
@@ -477,8 +493,8 @@
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
     <img class="site-author-image" itemprop="image"
       src="/images/avatar.jpg"
-      alt="zcsherry">
-  <p class="site-author-name" itemprop="name">zcsherry</p>
+      alt="zcs">
+  <p class="site-author-name" itemprop="name">zcs</p>
   <div class="site-description" itemprop="description">记录学习java的艰辛历程</div>
 </div>
   <nav class="site-state motion-element">
@@ -512,7 +528,7 @@
             <a href="/tags/">
           
         
-        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-count">7</span>
         <span class="site-state-item-name">标签</span>
         </a>
       </div>
@@ -550,7 +566,7 @@
   <span class="with-love" id="animate">
     <i class="fa fa-user"></i>
   </span>
-  <span class="author" itemprop="copyrightHolder">zcsherry</span>
+  <span class="author" itemprop="copyrightHolder">zcs</span>
 </div>
   <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.9.0</div>
   <span class="post-meta-divider">|</span>
