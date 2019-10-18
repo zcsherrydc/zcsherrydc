@@ -55,22 +55,22 @@
   };
 </script>
 
-  <meta name="description" content="前言爬了两天的坑终于上来了，看别人写的很简单，自己写的时候就各种问题，网上SSO文章很多，写的时候就各种问题（自己太菜了）。记录一下，以后方便查看。 关于OAuth2认证和授权服务器见上一篇 https://zcsherrydc.github.io/2019/10/07/SpringCloud-OAuth2%E5%92%8CJWT/ 项目地址： https://github.com/zcsherr">
+  <meta name="description" content="前言爬了两天的坑终于上来了，看别人写的很简单，自己写的时候就各种问题，网上SSO文章很多，写的时候就各种问题（自己太菜了）。记录一下，以后方便查看。 关于OAuth2认证和授权服务器见上一篇 https://zheyday.github.io/2019/10/07/SpringCloud-OAuth2%E5%92%8CJWT/ 项目地址： https://github.com/zheyday/Sp">
 <meta name="keywords" content="SpringCloud">
 <meta property="og:type" content="article">
 <meta property="og:title" content="SpringCloud-OAuth2结合zuul实现SSO">
 <meta property="og:url" content="https://zheyday.github.io/2019/10/11/SpringCloud-OAuth2实现SSO/index.html">
 <meta property="og:site_name" content="ZCS的个人博客">
-<meta property="og:description" content="前言爬了两天的坑终于上来了，看别人写的很简单，自己写的时候就各种问题，网上SSO文章很多，写的时候就各种问题（自己太菜了）。记录一下，以后方便查看。 关于OAuth2认证和授权服务器见上一篇 https://zcsherrydc.github.io/2019/10/07/SpringCloud-OAuth2%E5%92%8CJWT/ 项目地址： https://github.com/zcsherr">
+<meta property="og:description" content="前言爬了两天的坑终于上来了，看别人写的很简单，自己写的时候就各种问题，网上SSO文章很多，写的时候就各种问题（自己太菜了）。记录一下，以后方便查看。 关于OAuth2认证和授权服务器见上一篇 https://zheyday.github.io/2019/10/07/SpringCloud-OAuth2%E5%92%8CJWT/ 项目地址： https://github.com/zheyday/Sp">
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="https://zheyday.github.io/2019/10/11/SpringCloud-OAuth2实现SSO/1570779345082.png">
 <meta property="og:image" content="https://zheyday.github.io/2019/10/11/SpringCloud-OAuth2实现SSO/1570779361869.png">
 <meta property="og:image" content="https://zheyday.github.io/2019/10/11/SpringCloud-OAuth2实现SSO/1570779411739.png">
 <meta property="og:image" content="https://zheyday.github.io/2019/10/11/SpringCloud-OAuth2实现SSO/1570779295223.png">
-<meta property="og:updated_time" content="2019-10-18T11:53:54.750Z">
+<meta property="og:updated_time" content="2019-10-18T12:09:29.632Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="SpringCloud-OAuth2结合zuul实现SSO">
-<meta name="twitter:description" content="前言爬了两天的坑终于上来了，看别人写的很简单，自己写的时候就各种问题，网上SSO文章很多，写的时候就各种问题（自己太菜了）。记录一下，以后方便查看。 关于OAuth2认证和授权服务器见上一篇 https://zcsherrydc.github.io/2019/10/07/SpringCloud-OAuth2%E5%92%8CJWT/ 项目地址： https://github.com/zcsherr">
+<meta name="twitter:description" content="前言爬了两天的坑终于上来了，看别人写的很简单，自己写的时候就各种问题，网上SSO文章很多，写的时候就各种问题（自己太菜了）。记录一下，以后方便查看。 关于OAuth2认证和授权服务器见上一篇 https://zheyday.github.io/2019/10/07/SpringCloud-OAuth2%E5%92%8CJWT/ 项目地址： https://github.com/zheyday/Sp">
 <meta name="twitter:image" content="https://zheyday.github.io/2019/10/11/SpringCloud-OAuth2实现SSO/1570779345082.png">
   <link rel="canonical" href="https://zheyday.github.io/2019/10/11/SpringCloud-OAuth2实现SSO/">
 
@@ -282,7 +282,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2019-10-18 19:53:54" itemprop="dateModified" datetime="2019-10-18T19:53:54+08:00">2019-10-18</time>
+                <time title="修改时间：2019-10-18 20:09:29" itemprop="dateModified" datetime="2019-10-18T20:09:29+08:00">2019-10-18</time>
               </span>
             
           
@@ -308,9 +308,9 @@
       
         <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>爬了两天的坑终于上来了，看别人写的很简单，自己写的时候就各种问题，网上SSO文章很多，写的时候就各种问题（自己太菜了）。记录一下，以后方便查看。</p>
 <p>关于OAuth2认证和授权服务器见上一篇</p>
-<p><a href="https://zcsherrydc.github.io/2019/10/07/SpringCloud-OAuth2和JWT/" target="_blank" rel="noopener">https://zcsherrydc.github.io/2019/10/07/SpringCloud-OAuth2%E5%92%8CJWT/</a></p>
+<p><a href="https://zheyday.github.io/2019/10/07/SpringCloud-OAuth2和JWT/">https://zheyday.github.io/2019/10/07/SpringCloud-OAuth2%E5%92%8CJWT/</a></p>
 <p><strong><font color="#0099ff">项目地址</font></strong>：</p>
-<p><a href="https://github.com/zcsherrydc/SpringCloudStudy" target="_blank" rel="noopener">https://github.com/zcsherrydc/SpringCloudStudy</a></p>
+<p><a href="https://github.com/zheyday/SpringCloudStudy" target="_blank" rel="noopener">https://github.com/zheyday/SpringCloudStudy</a></p>
 <p>使用git工具</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git checkout sso</span><br></pre></td></tr></table></figure>
 
@@ -331,7 +331,7 @@
 </ul>
 <p>要实现的功能就是通过zuul端口访问eureka-client，首次需要登录，然后内部跳转到oauth-server中进行认证和授权，成功之后也可以不用登录访问eureka-client1。</p>
 <h2 id="oauth-server"><a href="#oauth-server" class="headerlink" title="oauth-server"></a>oauth-server</h2><p>详见</p>
-<p><a href="https://zcsherrydc.github.io/2019/10/07/SpringCloud-OAuth2和JWT/" target="_blank" rel="noopener">https://zcsherrydc.github.io/2019/10/07/SpringCloud-OAuth2%E5%92%8CJWT/</a></p>
+<p><a href="https://zheyday.github.io/2019/10/07/SpringCloud-OAuth2和JWT/">https://zheyday.github.io/2019/10/07/SpringCloud-OAuth2%E5%92%8CJWT/</a></p>
 <p>更改了几个地方</p>
 <h3 id="AuthorizationServerConfig"><a href="#AuthorizationServerConfig" class="headerlink" title="AuthorizationServerConfig"></a>AuthorizationServerConfig</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">   <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">configure</span><span class="params">(ClientDetailsServiceConfigurer clients)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        clients.inMemory()</span><br><span class="line">                .withClient(<span class="string">"zuul"</span>)</span><br><span class="line">                .secret(<span class="keyword">new</span> BCryptPasswordEncoder().encode(<span class="string">"secret"</span>))</span><br><span class="line">                .scopes(<span class="string">"app"</span>)</span><br><span class="line">                .authorizedGrantTypes(<span class="string">"authorization_code"</span>, <span class="string">"password"</span>)</span><br><span class="line">                .redirectUris(<span class="string">"http://localhost:9110/login"</span>)</span><br><span class="line">        ;</span><br><span class="line"><span class="comment">//        clients.withClientDetails(new JdbcClientDetailsService(dataSource));</span></span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
 
