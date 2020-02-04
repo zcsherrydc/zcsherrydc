@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+
+
+
+
+
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.9.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.4.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.4.0">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.4.0">
+  <link rel="mask-icon" href="/images/logo.svg?v=7.4.0" color="#222">
+
+<link rel="stylesheet" href="/css/main.css?v=7.4.0">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.7.0">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.4.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="秒杀系统设计1、流量治理 限流 用户侧限流： 网关限流： 应用系统限流： 令牌桶算法：  分流   现在有如下几个服务  EurekaServerSingle是服务注册中心 OauthServerApplication是OAuth2服务器 Zuul是网关，负责服务转发、负载均衡、熔断 Seckill是秒杀服务 准备工作新建一个JMeter测试计划，添加如下内容  添加步骤：  右击测试计划 –&amp;g">
+<meta name="keywords" content="java">
+<meta property="og:type" content="article">
+<meta property="og:title" content="mysql+redis+rabbitmq秒杀系统设计">
+<meta property="og:url" content="https://zheyday.github.io/2020/02/04/秒杀系统设计/index.html">
+<meta property="og:site_name" content="ZCS的个人博客">
+<meta property="og:description" content="秒杀系统设计1、流量治理 限流 用户侧限流： 网关限流： 应用系统限流： 令牌桶算法：  分流   现在有如下几个服务  EurekaServerSingle是服务注册中心 OauthServerApplication是OAuth2服务器 Zuul是网关，负责服务转发、负载均衡、熔断 Seckill是秒杀服务 准备工作新建一个JMeter测试计划，添加如下内容  添加步骤：  右击测试计划 –&amp;g">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://zheyday.github.io/2020/02/04/秒杀系统设计/image-20191110162017587.png">
+<meta property="og:image" content="https://zheyday.github.io/2020/02/04/秒杀系统设计/image-20191110163002592.png">
+<meta property="og:image" content="https://zheyday.github.io/2020/02/04/秒杀系统设计/image-20191110164022950.png">
+<meta property="og:image" content="https://zheyday.github.io/2020/02/04/秒杀系统设计/image-20191110164215773.png">
+<meta property="og:image" content="https://zheyday.github.io/2020/02/04/秒杀系统设计/image-20191119183209284.png">
+<meta property="og:image" content="https://zheyday.github.io/2020/02/04/秒杀系统设计/image-20191119092941253.png">
+<meta property="og:image" content="https://zheyday.github.io/2020/02/04/秒杀系统设计/image-20191119101549640.png">
+<meta property="og:image" content="https://zheyday.github.io/2020/02/04/秒杀系统设计/image-20191119160912922.png">
+<meta property="og:image" content="https://zheyday.github.io/2020/02/04/秒杀系统设计/image-20191119183025749.png">
+<meta property="og:updated_time" content="2020-02-04T05:58:54.134Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="mysql+redis+rabbitmq秒杀系统设计">
+<meta name="twitter:description" content="秒杀系统设计1、流量治理 限流 用户侧限流： 网关限流： 应用系统限流： 令牌桶算法：  分流   现在有如下几个服务  EurekaServerSingle是服务注册中心 OauthServerApplication是OAuth2服务器 Zuul是网关，负责服务转发、负载均衡、熔断 Seckill是秒杀服务 准备工作新建一个JMeter测试计划，添加如下内容  添加步骤：  右击测试计划 –&amp;g">
+<meta name="twitter:image" content="https://zheyday.github.io/2020/02/04/秒杀系统设计/image-20191110162017587.png">
+  <link rel="canonical" href="https://zheyday.github.io/2020/02/04/秒杀系统设计/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>mysql+redis+rabbitmq秒杀系统设计 | ZCS的个人博客</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?55864c2366e465f89af638f880bcbd5f";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">ZCS的个人博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+      
+      
+      
+        
+        <li class="menu-item menu-item-home">
+      
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-about">
+      
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-tags">
+      
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-categories">
+      
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-archives">
+      
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+            
+
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+      <article itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block post">
+    <link itemprop="mainEntityOfPage" href="https://zheyday.github.io/2020/02/04/秒杀系统设计/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="zcs">
+      <meta itemprop="description" content="记录学习java的艰辛历程">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="ZCS的个人博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">mysql+redis+rabbitmq秒杀系统设计
+
+          
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              
+                
+              
+
+              <time title="创建时间：2020-02-04 13:58:54" itemprop="dateCreated datePublished" datetime="2020-02-04T13:58:54+08:00">2020-02-04</time>
+            </span>
+          
+
+          
+            <span id="/2020/02/04/秒杀系统设计/" class="post-meta-item leancloud_visitors" data-flag-title="mysql+redis+rabbitmq秒杀系统设计" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+        
+      
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2020/02/04/秒杀系统设计/#comments" itemprop="discussionUrl"><span class="post-comments-count valine-comment-count" data-xid="/2020/02/04/秒杀系统设计/" itemprop="commentCount"></span></a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="秒杀系统设计"><a href="#秒杀系统设计" class="headerlink" title="秒杀系统设计"></a>秒杀系统设计</h2><h3 id="1、流量治理"><a href="#1、流量治理" class="headerlink" title="1、流量治理"></a>1、流量治理</h3><ol>
+<li><p>限流</p>
+<p>用户侧限流：</p>
+<p>网关限流：</p>
+<p>应用系统限流：</p>
+<p>令牌桶算法：</p>
+</li>
+<li><p>分流</p>
+</li>
+</ol>
+<p>现在有如下几个服务</p>
+<p><img src="//zheyday.github.io/2020/02/04/秒杀系统设计/image-20191110162017587.png" alt="image-20191110162017587"></p>
+<p>EurekaServerSingle是服务注册中心</p>
+<p>OauthServerApplication是OAuth2服务器</p>
+<p>Zuul是网关，负责服务转发、负载均衡、熔断</p>
+<p>Seckill是秒杀服务</p>
+<h2 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h2><p>新建一个JMeter测试计划，添加如下内容</p>
+<p><img src="//zheyday.github.io/2020/02/04/秒杀系统设计/image-20191110163002592.png" alt="image-20191110163002592"></p>
+<p>添加步骤：</p>
+<ol>
+<li>右击测试计划 –&gt; 添加 –&gt; 线程 （用户）–&gt; 线程组，线程数设置5000，Ramp-Up设为1，也就是1启动5000个线程</li>
+<li>右击线程组 –&gt; 添加  –&gt;取样器 –&gt; HTTP请求，配置要访问的路径</li>
+<li>右击HTTP请求 –&gt; 添加 –&gt; 配置元件–&gt; HTTP信息头管理器，这个下面说明</li>
+<li>右击线程组 –&gt; 添加  –&gt;监听器 –&gt;察看结果树/聚合报告</li>
+</ol>
+<p>说明一下：</p>
+<p>由于所有的资源都被OAuth2保护起来了，所以想要访问必须要经过登陆授权的步骤，为了方便起见，先在浏览器正常访问一个资源进行授权，然后获取里面的cookie值，放入HTTP信息头管理器中</p>
+<p><img src="//zheyday.github.io/2020/02/04/秒杀系统设计/image-20191110164022950.png" alt="image-20191110164022950"></p>
+<p>在Cookie中有个 JSESSIONID ，把它们整个放到HTTP信息头管理器</p>
+<p><img src="//zheyday.github.io/2020/02/04/秒杀系统设计/image-20191110164215773.png" alt="image-20191110164215773"></p>
+<h2 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h2><h3 id="一、最简单的加锁"><a href="#一、最简单的加锁" class="headerlink" title="一、最简单的加锁"></a>一、最简单的加锁</h3><p>程序加synchronized锁，先读取数据库信息，然后自减，再更新，所有的逻辑操作都在程序中完成</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">	<span class="meta">@GetMapping</span>(<span class="string">"/order"</span>)</span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">reduceStack</span><span class="params">(@Param(<span class="string">"id"</span>)</span> String id) </span>&#123;</span><br><span class="line">        Integer number;</span><br><span class="line">        <span class="keyword">synchronized</span> (<span class="keyword">this</span>) &#123;</span><br><span class="line">            Seckill seckill = seckillService.getById(id);</span><br><span class="line">            number = seckill.getNumber();</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (number &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                seckill.setNumber(--number);</span><br><span class="line">                seckillService.updateById(seckill);</span><br><span class="line">                number = seckillService.getById(id).getNumber();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        ResultData&lt;Integer&gt; resultData = <span class="keyword">new</span> ResultData&lt;Integer&gt;(<span class="number">20000</span>, <span class="string">"number"</span>, number);</span><br><span class="line"></span><br><span class="line">        Gson gson = <span class="keyword">new</span> GsonBuilder().setDateFormat(DateFormat.FULL, DateFormat.FULL).create();</span><br><span class="line"><span class="comment">//        System.out.println(System.currentTimeMillis()-start);</span></span><br><span class="line">        <span class="keyword">return</span> gson.toJson(resultData);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="//zheyday.github.io/2020/02/04/秒杀系统设计/image-20191119183209284.png" alt="image-20191119183209284"></p>
+<p>显然，可以看到吞吐量低</p>
+<p>因为这段程序进行了加锁，而且所有的逻辑都在程序里执行，和数据库的交互也存在时间延迟</p>
+<h3 id="二、在数据库中完成"><a href="#二、在数据库中完成" class="headerlink" title="二、在数据库中完成"></a>二、在数据库中完成</h3><p>自检操作在数据库中完成，SeckillMapper中添加函数</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Update</span>(<span class="string">"update seckill set number=number-1 where id=1 and number &gt; 0 "</span>)</span><br><span class="line">   <span class="function">Integer <span class="title">minusOne</span><span class="params">()</span></span>;</span><br></pre></td></tr></table></figure>
+
+<p>减库存逻辑函数修改为</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">    <span class="meta">@GetMapping</span>(<span class="string">"/order"</span>)</span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">reduceStack</span><span class="params">(@Param(<span class="string">"id"</span>)</span> Integer id) </span>&#123;</span><br><span class="line"><span class="comment">//        long start=System.currentTimeMillis();</span></span><br><span class="line">        Integer number=-<span class="number">1</span>;</span><br><span class="line">        <span class="keyword">if</span> (seckillService.minusStack(id)!=<span class="number">0</span>)&#123;</span><br><span class="line">            number = seckillService.getById(id).getNumber();</span><br><span class="line">        &#125;</span><br><span class="line">        ResultData&lt;Integer&gt; resultData = <span class="keyword">new</span> ResultData&lt;Integer&gt;(<span class="number">20000</span>, <span class="string">"number"</span>, number);</span><br><span class="line"></span><br><span class="line">        Gson gson = <span class="keyword">new</span> GsonBuilder().setDateFormat(DateFormat.FULL, DateFormat.FULL).create();</span><br><span class="line"><span class="comment">//        System.out.println(System.currentTimeMillis()-start);</span></span><br><span class="line">        <span class="keyword">return</span> gson.toJson(resultData);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>测试结果</p>
+<p><img src="//zheyday.github.io/2020/02/04/秒杀系统设计/image-20191119092941253.png" alt="image-20191119092941253"></p>
+<p>由于去掉了锁的限制，整个逻辑只有对数据库一行代码的操作，在提升速度的同时也保证了原子性</p>
+<h3 id="三、使用redis"><a href="#三、使用redis" class="headerlink" title="三、使用redis"></a>三、使用redis</h3><h4 id="分布式锁"><a href="#分布式锁" class="headerlink" title="分布式锁"></a>分布式锁</h4><p>这个属于悲观锁，原理大概是一个线程在操作数据的时候加一把锁，不允许其他线程进行操作，主要利用setnx命令（ SET if Not exists ），就是当key不存在时，将key设为value，并返回1，否则返回0。操作结束后将该key删除。同时为了防止发生死锁，要设置key的过期时间</p>
+<p>这里设置key为lock，value=1，过期时间是1s，具体的redisUtil方法后面贴出</p>
+<p>goods的值在初始化中进行设置，预先加载到内存中</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (!redisUtil.setnx(<span class="string">"lock"</span>,<span class="number">1</span>,<span class="number">1</span>))</span><br><span class="line">        <span class="keyword">return</span> <span class="string">"so busy"</span>;</span><br><span class="line">    Integer number = (Integer) redisUtil.get(<span class="string">"goods"</span>);</span><br><span class="line">    <span class="keyword">if</span> (number &gt; <span class="number">0</span>) &#123;</span><br><span class="line">         number=redisUtil.decrBy(<span class="string">"goods"</span>,<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    redisUtil.unlock(<span class="string">"lock"</span>);</span><br></pre></td></tr></table></figure>
+
+<p>测试结果如下，同时也没有出现超卖情况</p>
+<p><img src="//zheyday.github.io/2020/02/04/秒杀系统设计/image-20191119101549640.png" alt="image-20191119101549640"></p>
+<h4 id="乐观锁"><a href="#乐观锁" class="headerlink" title="乐观锁"></a>乐观锁</h4><p>乐观锁是基于数据版本实现的，数据库中是在表中添加version字段，在读取数据时将version一同读出，之后进行写操作时对version加1。提交数据时如果该值比当前表中记录的值大，则更新，否则就是过期数据。在redis中，可以使用watch加事务实现，通过watch监视指定的key，当exec时如果key发生改变，则整个事务失败</p>
+<p><font color="red">注意</font></p>
+<p>redis是单线程，单个命令的执行是原子性的，但是redis在事务上没有任何原子性的限制，所以事务不是原子性的。事务可以理解为一个打包的批量执行脚本，中间某条指令的失败不会导致前面指令的回滚，也不会造成后续指令停止。</p>
+<p>但是</p>
+<ol>
+<li>discard可以取消事务</li>
+<li>watch一个key，如果事务exec之前这个key被改动，那么事务将被打断</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">watch</span><span class="params">(String key)</span> </span>&#123;</span><br><span class="line">       redisTemplate.watch(key);</span><br><span class="line">       Integer number = (Integer) get(key);</span><br><span class="line">       <span class="keyword">if</span> (number &lt;= <span class="number">0</span>) &#123;</span><br><span class="line">           <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">       &#125;</span><br><span class="line">       redisTemplate.multi();</span><br><span class="line">       redisTemplate.opsForValue().decrement(key, <span class="number">1</span>);</span><br><span class="line">       List&lt;Object&gt; list = redisTemplate.exec();</span><br><span class="line">       <span class="keyword">return</span> list.size() != <span class="number">0</span>;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="//zheyday.github.io/2020/02/04/秒杀系统设计/image-20191119160912922.png" alt="image-20191119160912922"></p>
+<p>从结果上看，两种方法的吞吐量好像差不多，乐观锁的还低一点，不太明白这样是否正常，按理说应该高一点才对。</p>
+<h4 id="lua脚本"><a href="#lua脚本" class="headerlink" title="lua脚本"></a>lua脚本</h4><p>上面乐观锁的处理略显臃肿，需要watch一个key，还要开启事务等一系列操作。那么如果优雅的进行原子性的操作呢？这时候lua就出来了</p>
+<p>使用lua脚本后，redis程序会有明显的性能提升</p>
+<ul>
+<li>减少网络io操作：上节的操作会向redis服务器发起多次请求，现在用一个请求即可完成</li>
+<li>原子操作：redis会将整个脚本作为一个整体运行</li>
+<li>复用：脚本会永久存储在redis中</li>
+</ul>
+<p>redis-cli中先试试</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">eval &quot;return redis.call(&apos;DECRBY&apos;,KEYS[1],1)&quot; key-num [key1 key2 ....] [value1 value2....]</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>eval命令表示执行lua脚本</li>
+<li>双引号里是具体的内容</li>
+<li>KEYS[1]对应的是后面传入的key参数，还有ARGV[1]对应的是value参数</li>
+<li>key-num表示key的个数</li>
+<li>[key1 key2]是key作为参数传给lua，要和key-num对应</li>
+<li>[value1 value2]也是参数</li>
+</ul>
+<p><strong>RedisUtil中添加</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">    <span class="keyword">private</span> DefaultRedisScript&lt;Long&gt; redisScript;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@PostConstruct</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">init</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        redisScript = <span class="keyword">new</span> DefaultRedisScript&lt;&gt;();</span><br><span class="line">        redisScript.setResultType(Long.class);</span><br><span class="line">        redisScript.setScriptText(<span class="string">"local number = tonumber(redis.call('get',KEYS[1]))\n"</span> +</span><br><span class="line">                <span class="string">"if number &lt;= 0 then\n"</span> +</span><br><span class="line">                <span class="string">"    return 0;\n"</span> +</span><br><span class="line">                <span class="string">"end\n"</span> +</span><br><span class="line">                <span class="string">"return redis.call('DECRBY',KEYS[1],1);"</span>);</span><br><span class="line"><span class="comment">//        redisScript.setScriptSource(new ResourceScriptSource(new ClassPathResource("seckill.lua")));</span></span><br><span class="line"><span class="comment">//        redisScript.setLocation(new ClassPathResource("seckill.lua"));</span></span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>注意：这里貌似只能使用Long，Integer会报错</p>
+<p>直接把脚本写成string，不用每次都要从文件加载，速度会快一些</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> Long <span class="title">lua</span><span class="params">(String key)</span> </span>&#123;</span><br><span class="line">       List&lt;String&gt; keyList = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">       keyList.add(key);</span><br><span class="line">       <span class="keyword">return</span> redisTemplate.execute(redisScript, keyList);</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<p>keyList用于存储需要用到的key</p>
+<p><img src="//zheyday.github.io/2020/02/04/秒杀系统设计/image-20191119183025749.png" alt="image-20191119183025749"></p>
+<h3 id="四、RabbitMQ出场"><a href="#四、RabbitMQ出场" class="headerlink" title="四、RabbitMQ出场"></a>四、RabbitMQ出场</h3><p>RabbitMQ并不是为了取代redis，只是存储秒杀信息用于订单处理，所以在秒杀这部分功能还是使用redis</p>
+<p>配置一个队列</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RabbitDirectConfig</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Queue <span class="title">seckillQueue</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> Queue(<span class="string">"seckill"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>还是用redis进行交互，成功后将手机号放入队列</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">    <span class="meta">@GetMapping</span>(<span class="string">"/orderMq"</span>)</span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">reduceStackMq</span><span class="params">(@Param(<span class="string">"id"</span>)</span> Integer id, @<span class="title">Param</span><span class="params">(<span class="string">"phone"</span>)</span> String phone) </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (localOverMap.get(id))</span><br><span class="line">            <span class="keyword">return</span> commonUtil.toJson(ResponseState.OK, <span class="string">"number"</span>, -<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">        Long number = redisUtil.lua(KEY, SUCCESS, phone);</span><br><span class="line">        <span class="keyword">if</span> (number &gt;= <span class="number">0</span>) &#123;</span><br><span class="line"><span class="comment">//            成功</span></span><br><span class="line">            amqpTemplate.convertAndSend(<span class="string">"seckill"</span>,phone);</span><br><span class="line">        &#125;<span class="keyword">else</span></span><br><span class="line">            localOverMap.put(id,<span class="keyword">true</span>);</span><br><span class="line">        <span class="keyword">return</span> commonUtil.toJson(ResponseState.OK, <span class="string">"number"</span>, number);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="坑"><a href="#坑" class="headerlink" title="坑"></a>坑</h2><p><font color="red">注意</font></p>
+<ol>
+<li><p>如果线程数选的过大，比如10w，可能会报<font color="red"> Address already in use : connect </font><br>原因：windows提供给TCP/IP链接的端口为 1024-5000，并且要四分钟来循环回收它们，就导致我们在短时间内跑大量的请求时将端口占满了，导致如上报错。 </p>
+<p>解决办法（在jmeter所在服务器操作）：</p>
+<p>1.cmd中输入regedit命令打开注册表；</p>
+<p>2.在 HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters右键Parameters；</p>
+<p>3.添加一个新的DWORD，名字为MaxUserPort，如果有的话就不用新建；</p>
+<p>4.然后双击MaxUserPort，输入数值数据为65534，基数选择十进制；</p>
+<p>5.完成以上操作，务必重启机器，问题解决，亲测有效；</p>
+</li>
+<li><p><font color="red"> org.apache.http.conn.HttpHostConnectException: Connect to localhost:80</font><br>JMeter的HTTP请求里的服务器名称要和工程里application.yml配置一样，比如都是localhost或者192.168.0.xxx</p>
+</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center;">
+  <img id="wechat_subscriber_qcode" src="/images/wechat-qcode.jpg" alt="zcs wechat" style="width: 200px; max-width: 100%;">
+  <div>微信扫一扫,手机也能看.</div>
+</div>
+
+      
+        
+      
+
+      <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+              
+                <a href="/2019/11/09/SpringCloud打包docker/" rel="next" title="SpringCloud打包docker">
+                  <i class="fa fa-chevron-left"></i> SpringCloud打包docker
+                </a>
+              
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+              
+            </div>
+          </div>
+        
+      </footer>
+    
+  </div>
+  
+  
+  
+  </article>
+
+  </div>
+
+
+          </div>
+          
+    
+    <div class="comments" id="comments"></div>
+  
+
+        </div>
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+        
+        
+        
+        
+      
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#秒杀系统设计"><span class="nav-number">1.</span> <span class="nav-text">秒杀系统设计</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1、流量治理"><span class="nav-number">1.1.</span> <span class="nav-text">1、流量治理</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#准备工作"><span class="nav-number">2.</span> <span class="nav-text">准备工作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#测试"><span class="nav-number">3.</span> <span class="nav-text">测试</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#一、最简单的加锁"><span class="nav-number">3.1.</span> <span class="nav-text">一、最简单的加锁</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#二、在数据库中完成"><span class="nav-number">3.2.</span> <span class="nav-text">二、在数据库中完成</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#三、使用redis"><span class="nav-number">3.3.</span> <span class="nav-text">三、使用redis</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#分布式锁"><span class="nav-number">3.3.1.</span> <span class="nav-text">分布式锁</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#乐观锁"><span class="nav-number">3.3.2.</span> <span class="nav-text">乐观锁</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#lua脚本"><span class="nav-number">3.3.3.</span> <span class="nav-text">lua脚本</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#四、RabbitMQ出场"><span class="nav-number">3.4.</span> <span class="nav-text">四、RabbitMQ出场</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#坑"><span class="nav-number">4.</span> <span class="nav-text">坑</span></a></li></ol></div>
+        
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image"
+      src="/images/avatar.jpg"
+      alt="zcs">
+  <p class="site-author-name" itemprop="name">zcs</p>
+  <div class="site-description" itemprop="description">记录学习java的艰辛历程</div>
+</div>
+  <nav class="site-state motion-element">
+      <div class="site-state-item site-state-posts">
+        
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">8</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+    
+      
+      
+      <div class="site-state-item site-state-categories">
+        
+          
+            <a href="/categories/">
+          
+        
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span>
+        </a>
+      </div>
+    
+      
+      
+      <div class="site-state-item site-state-tags">
+        
+          
+            <a href="/tags/">
+          
+        
+        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-name">标签</span>
+        </a>
+      </div>
+    
+  </nav>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+      
+      
+        
+      
+      
+        
+      
+        <a href="https://github.com/zheyday" title="GitHub &rarr; https://github.com/zheyday" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+    
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">zcs</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.9.0</div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.4.0</div>
+
+        
+
+
+
+
+
+
+  
+  <script>
+  function leancloudSelector(url) {
+    return document.getElementById(url).querySelector('.leancloud-visitors-count');
+  }
+  if (CONFIG.page.isPost) {
+    function addCount(Counter) {
+      var visitors = document.querySelector('.leancloud_visitors');
+      var url = visitors.getAttribute('id').trim();
+      var title = visitors.getAttribute('data-flag-title').trim();
+
+      Counter('get', `/classes/Counter?where=${JSON.stringify({ url })}`)
+        .then(response => response.json())
+        .then(({ results }) => {
+          if (results.length > 0) {
+            var counter = results[0];
+              leancloudSelector(url).innerText = counter.time + 1;
+            
+            Counter('put', '/classes/Counter/' + counter.objectId, { time: { '__op': 'Increment', 'amount': 1 } })
+              .then(response => response.json())
+              .catch(error => {
+                console.log('Failed to save visitor count', error);
+              })
+          } else {
+              Counter('post', '/classes/Counter', { title: title, url: url, time: 1 })
+                .then(response => response.json())
+                .then(() => {
+                  leancloudSelector(url).innerText = 1;
+                })
+                .catch(error => {
+                  console.log('Failed to create', error);
+                });
+            
+          }
+        })
+        .catch(error => {
+          console.log('LeanCloud Counter Error', error);
+        });
+    }
+  } else {
+    function showTime(Counter) {
+      var visitors = document.querySelectorAll('.leancloud_visitors');
+      var entries = [...visitors].map(element => {
+        return element.getAttribute('id').trim();
+      });
+
+      Counter('get', `/classes/Counter?where=${JSON.stringify({ url: { '$in': entries } })}`)
+        .then(response => response.json())
+        .then(({ results }) => {
+          if (results.length === 0) {
+            document.querySelectorAll('.leancloud_visitors .leancloud-visitors-count').forEach(element => {
+              element.innerText = 0;
+            });
+            return;
+          }
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.url;
+            var time = item.time;
+            leancloudSelector(url).innerText = time;
+          }
+          for (var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = leancloudSelector(url);
+            if (element.innerText == '') {
+              element.innerText = 0;
+            }
+          }
+        })
+        .catch(error => {
+          console.log('LeanCloud Counter Error', error);
+        });
+    }
+  }
+
+  fetch('https://app-router.leancloud.cn/2/route?appId=IIXKGrLJnrYk9UQo8crDc3jY-gzGzoHsz')
+    .then(response => response.json())
+    .then(({ api_server }) => {
+      var Counter = (method, url, data) => {
+        return fetch(`https://${api_server}/1.1${url}`, {
+          method: method,
+          headers: {
+            'X-LC-Id': 'IIXKGrLJnrYk9UQo8crDc3jY-gzGzoHsz',
+            'X-LC-Key': '2aOR7cL96GJfJOK6WtoaDYgI',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data)
+        });
+      };
+      if (CONFIG.page.isPost) {
+        const localhost = /http:\/\/(localhost|127.0.0.1|0.0.0.0)/;
+        if (localhost.test(document.URL)) return;
+        addCount(Counter);
+      } else if (document.querySelectorAll('.post-title-link').length >= 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+
+
+  <script src="/lib/anime.min.js?v=3.1.0"></script>
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+<script src="/js/utils.js?v=7.4.0"></script><script src="/js/motion.js?v=7.4.0"></script>
+<script src="/js/schemes/pisces.js?v=7.4.0"></script>
+
+<script src="/js/next-boot.js?v=7.4.0"></script>
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+
+<script>
+NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+  var GUEST = ['nick', 'mail', 'link'];
+  var guest = 'nick,mail,link';
+  guest = guest.split(',').filter(item => {
+    return GUEST.includes(item);
+  });
+  new Valine({
+    el: '#comments',
+    verify: false,
+    notify: false,
+    appId: 'IIXKGrLJnrYk9UQo8crDc3jY-gzGzoHsz',
+    appKey: '2aOR7cL96GJfJOK6WtoaDYgI',
+    placeholder: '冲啊',
+    avatar: 'identicon',
+    meta: guest,
+    pageSize: '10' || 10,
+    visitor: false,
+    lang: '' || 'zh-cn',
+    path: location.pathname
+  });
+}, window.Valine);
+</script>
+
+</body>
+</html>
