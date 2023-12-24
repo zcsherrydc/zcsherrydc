@@ -56,13 +56,13 @@
   };
 </script>
 
-  <meta name="description" content="秒杀系统设计微服务和分布式微服务：根据业务将整体拆分成一个个独立的服务单元，每个单元只负责一个功能 分布式：将服务分部到多个服务器上，单体应用和微服务都可以是分布式 RESTful API每个URI代表一种资源，资源是实体，可以有多种表现形式，称为表现层。访问网站就代表了客户端和服务器的一个互动过程。客户端通过HTTP动词，对服务器资源进行操作，完成表现层状态转化 所以URI中只能有名词 流量治理">
+  <meta name="description" content="秒杀系统设计微服务和分布式微服务：根据业务将整体拆分成一个个独立的服务单元，每个单元只负责一个功能 分布式：将服务分部到多个服务器上，单体应用和微服务都可以是分布式">
 <meta name="keywords" content="java">
 <meta property="og:type" content="article">
 <meta property="og:title" content="mysql+redis+rabbitmq秒杀系统设计">
 <meta property="og:url" content="https://zheyday.github.io/2020/02/04/秒杀系统设计/index.html">
 <meta property="og:site_name" content="ZCS的个人博客">
-<meta property="og:description" content="秒杀系统设计微服务和分布式微服务：根据业务将整体拆分成一个个独立的服务单元，每个单元只负责一个功能 分布式：将服务分部到多个服务器上，单体应用和微服务都可以是分布式 RESTful API每个URI代表一种资源，资源是实体，可以有多种表现形式，称为表现层。访问网站就代表了客户端和服务器的一个互动过程。客户端通过HTTP动词，对服务器资源进行操作，完成表现层状态转化 所以URI中只能有名词 流量治理">
+<meta property="og:description" content="秒杀系统设计微服务和分布式微服务：根据业务将整体拆分成一个个独立的服务单元，每个单元只负责一个功能 分布式：将服务分部到多个服务器上，单体应用和微服务都可以是分布式">
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="https://zheyday.github.io/2020/02/04/秒杀系统设计/image-20191110162017587.png">
 <meta property="og:image" content="https://zheyday.github.io/2020/02/04/秒杀系统设计/image-20191110163002592.png">
@@ -73,10 +73,10 @@
 <meta property="og:image" content="https://zheyday.github.io/2020/02/04/秒杀系统设计/image-20191119101549640.png">
 <meta property="og:image" content="https://zheyday.github.io/2020/02/04/秒杀系统设计/image-20191119160912922.png">
 <meta property="og:image" content="https://zheyday.github.io/2020/02/04/秒杀系统设计/image-20191119183025749.png">
-<meta property="og:updated_time" content="2020-07-11T08:48:41.172Z">
+<meta property="og:updated_time" content="2023-12-24T01:58:08.633Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="mysql+redis+rabbitmq秒杀系统设计">
-<meta name="twitter:description" content="秒杀系统设计微服务和分布式微服务：根据业务将整体拆分成一个个独立的服务单元，每个单元只负责一个功能 分布式：将服务分部到多个服务器上，单体应用和微服务都可以是分布式 RESTful API每个URI代表一种资源，资源是实体，可以有多种表现形式，称为表现层。访问网站就代表了客户端和服务器的一个互动过程。客户端通过HTTP动词，对服务器资源进行操作，完成表现层状态转化 所以URI中只能有名词 流量治理">
+<meta name="twitter:description" content="秒杀系统设计微服务和分布式微服务：根据业务将整体拆分成一个个独立的服务单元，每个单元只负责一个功能 分布式：将服务分部到多个服务器上，单体应用和微服务都可以是分布式">
 <meta name="twitter:image" content="https://zheyday.github.io/2020/02/04/秒杀系统设计/image-20191110162017587.png">
   <link rel="canonical" href="https://zheyday.github.io/2020/02/04/秒杀系统设计/">
 
@@ -288,7 +288,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-07-11 16:48:41" itemprop="dateModified" datetime="2020-07-11T16:48:41+08:00">2020-07-11</time>
+                <time title="修改时间：2023-12-24 09:58:08" itemprop="dateModified" datetime="2023-12-24T09:58:08+08:00">2023-12-24</time>
               </span>
             
           
@@ -328,6 +328,8 @@
       
         <h2 id="秒杀系统设计"><a href="#秒杀系统设计" class="headerlink" title="秒杀系统设计"></a>秒杀系统设计</h2><h3 id="微服务和分布式"><a href="#微服务和分布式" class="headerlink" title="微服务和分布式"></a>微服务和分布式</h3><p>微服务：根据业务将整体拆分成一个个独立的服务单元，每个单元只负责一个功能</p>
 <p>分布式：将服务分部到多个服务器上，单体应用和微服务都可以是分布式</p>
+<a id="more"></a>
+
 <h3 id="RESTful-API"><a href="#RESTful-API" class="headerlink" title="RESTful API"></a>RESTful API</h3><p>每个URI代表一种资源，资源是实体，可以有多种表现形式，称为表现层。访问网站就代表了客户端和服务器的一个互动过程。客户端通过HTTP动词，对服务器资源进行操作，完成表现层状态转化</p>
 <p>所以URI中只能有名词</p>
 <h3 id="流量治理"><a href="#流量治理" class="headerlink" title="流量治理"></a>流量治理</h3><p>前端：页面动静分离、CDN缓存</p>
@@ -540,21 +542,8 @@
         
           <a href="/archives/">
         
-          <span class="site-state-item-count">8</span>
+          <span class="site-state-item-count">7</span>
           <span class="site-state-item-name">日志</span>
-        </a>
-      </div>
-    
-      
-      
-      <div class="site-state-item site-state-categories">
-        
-          
-            <a href="/categories/">
-          
-        
-        <span class="site-state-item-count">1</span>
-        <span class="site-state-item-name">分类</span>
         </a>
       </div>
     
@@ -566,7 +555,7 @@
             <a href="/tags/">
           
         
-        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-count">4</span>
         <span class="site-state-item-name">标签</span>
         </a>
       </div>
