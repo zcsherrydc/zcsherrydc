@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+
+
+
+
+
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.9.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.4.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.4.0">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.4.0">
+  <link rel="mask-icon" href="/images/logo.svg?v=7.4.0" color="#222">
+  <link rel="alternate" href="/atom.xml" title="ZCS的个人博客" type="application/atom+xml">
+
+<link rel="stylesheet" href="/css/main.css?v=7.4.0">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.7.0">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.4.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="前言爬了两天的坑终于上来了，看别人写的很简单，自己写的时候就各种问题，网上SSO文章很多，写的时候就各种问题（自己太菜了）。记录一下，以后方便查看。 关于OAuth2认证和授权服务器见上一篇 https://zheyday.github.io/2019/10/07/SpringCloud-OAuth2%E5%92%8CJWT/ 项目地址： https://github.com/zheyday/Sp">
+<meta name="keywords" content="SpringCloud">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SpringCloud-OAuth2结合zuul实现SSO">
+<meta property="og:url" content="https://zheyday.github.io/2019/10/11/SpringCloud-OAuth2实现SSO/index.html">
+<meta property="og:site_name" content="ZCS的个人博客">
+<meta property="og:description" content="前言爬了两天的坑终于上来了，看别人写的很简单，自己写的时候就各种问题，网上SSO文章很多，写的时候就各种问题（自己太菜了）。记录一下，以后方便查看。 关于OAuth2认证和授权服务器见上一篇 https://zheyday.github.io/2019/10/07/SpringCloud-OAuth2%E5%92%8CJWT/ 项目地址： https://github.com/zheyday/Sp">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://zheyday.github.io/2019/10/11/SpringCloud-OAuth2实现SSO/1570779345082.png">
+<meta property="og:image" content="https://zheyday.github.io/2019/10/11/SpringCloud-OAuth2实现SSO/1570779361869.png">
+<meta property="og:image" content="https://zheyday.github.io/2019/10/11/SpringCloud-OAuth2实现SSO/1570779411739.png">
+<meta property="og:image" content="https://zheyday.github.io/2019/10/11/SpringCloud-OAuth2实现SSO/1570779295223.png">
+<meta property="og:updated_time" content="2019-10-18T12:09:29.632Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="SpringCloud-OAuth2结合zuul实现SSO">
+<meta name="twitter:description" content="前言爬了两天的坑终于上来了，看别人写的很简单，自己写的时候就各种问题，网上SSO文章很多，写的时候就各种问题（自己太菜了）。记录一下，以后方便查看。 关于OAuth2认证和授权服务器见上一篇 https://zheyday.github.io/2019/10/07/SpringCloud-OAuth2%E5%92%8CJWT/ 项目地址： https://github.com/zheyday/Sp">
+<meta name="twitter:image" content="https://zheyday.github.io/2019/10/11/SpringCloud-OAuth2实现SSO/1570779345082.png">
+  <link rel="canonical" href="https://zheyday.github.io/2019/10/11/SpringCloud-OAuth2实现SSO/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>SpringCloud-OAuth2结合zuul实现SSO | ZCS的个人博客</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?55864c2366e465f89af638f880bcbd5f";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">ZCS的个人博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+      
+      
+      
+        
+        <li class="menu-item menu-item-home">
+      
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-about">
+      
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-tags">
+      
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-categories">
+      
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-archives">
+      
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+            
+
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+      <article itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block post">
+    <link itemprop="mainEntityOfPage" href="https://zheyday.github.io/2019/10/11/SpringCloud-OAuth2实现SSO/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="zcs">
+      <meta itemprop="description" content="记录学习java的艰辛历程">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="ZCS的个人博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">SpringCloud-OAuth2结合zuul实现SSO
+
+          
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              
+                
+              
+
+              <time title="创建时间：2019-10-11 14:19:39" itemprop="dateCreated datePublished" datetime="2019-10-11T14:19:39+08:00">2019-10-11</time>
+            </span>
+          
+            
+
+            
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2019-10-18 20:09:29" itemprop="dateModified" datetime="2019-10-18T20:09:29+08:00">2019-10-18</time>
+              </span>
+            
+          
+
+          
+            <span id="/2019/10/11/SpringCloud-OAuth2实现SSO/" class="post-meta-item leancloud_visitors" data-flag-title="SpringCloud-OAuth2结合zuul实现SSO" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+        
+      
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2019/10/11/SpringCloud-OAuth2实现SSO/#comments" itemprop="discussionUrl"><span class="post-comments-count valine-comment-count" data-xid="/2019/10/11/SpringCloud-OAuth2实现SSO/" itemprop="commentCount"></span></a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>爬了两天的坑终于上来了，看别人写的很简单，自己写的时候就各种问题，网上SSO文章很多，写的时候就各种问题（自己太菜了）。记录一下，以后方便查看。</p>
+<p>关于OAuth2认证和授权服务器见上一篇</p>
+<p><a href="https://zheyday.github.io/2019/10/07/SpringCloud-OAuth2和JWT/">https://zheyday.github.io/2019/10/07/SpringCloud-OAuth2%E5%92%8CJWT/</a></p>
+<p><strong><font color="#0099ff">项目地址</font></strong>：</p>
+<p><a href="https://github.com/zheyday/SpringCloudStudy" target="_blank" rel="noopener">https://github.com/zheyday/SpringCloudStudy</a></p>
+<p>使用git工具</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git checkout sso</span><br></pre></td></tr></table></figure>
+
+<p>参考资料：</p>
+<p><a href="https://www.cnblogs.com/cjsblog/p/10548022.html" target="_blank" rel="noopener">https://www.cnblogs.com/cjsblog/p/10548022.html</a></p>
+<p><a href="http://www.ruanyifeng.com/blog/2014/05/oauth_2_0.html" target="_blank" rel="noopener">阮一峰OAuth2讲解</a><br><a href="https://blog.csdn.net/WSM960921/article/details/98222004" target="_blank" rel="noopener">https://blog.csdn.net/WSM960921/article/details/98222004</a></p>
+<h2 id="什么是SSO"><a href="#什么是SSO" class="headerlink" title="什么是SSO"></a>什么是SSO</h2><p>英文全称single Sign On，中文名单点登录。就是在多应用系统中，用户只需要登录一次就可以访问所有信任服务。SSO通过将用户登陆信息映射到浏览器cookie中，解决其他服务免登陆获取用户session的问题。</p>
+<h2 id="大体框架"><a href="#大体框架" class="headerlink" title="大体框架"></a>大体框架</h2><p>项目中一个有5个模块：</p>
+<ul>
+<li><p>oauth-server是认证和授权服务，负责令牌的发放</p>
+</li>
+<li><p>zuul是网关服务，实现统一授权</p>
+</li>
+<li><p>eureka-client和eureka-client1是两个应用服务</p>
+</li>
+<li><p>eureka-server-single是eureka注册中心</p>
+</li>
+</ul>
+<p>要实现的功能就是通过zuul端口访问eureka-client，首次需要登录，然后内部跳转到oauth-server中进行认证和授权，成功之后也可以不用登录访问eureka-client1。</p>
+<h2 id="oauth-server"><a href="#oauth-server" class="headerlink" title="oauth-server"></a>oauth-server</h2><p>详见</p>
+<p><a href="https://zheyday.github.io/2019/10/07/SpringCloud-OAuth2和JWT/">https://zheyday.github.io/2019/10/07/SpringCloud-OAuth2%E5%92%8CJWT/</a></p>
+<p>更改了几个地方</p>
+<h3 id="AuthorizationServerConfig"><a href="#AuthorizationServerConfig" class="headerlink" title="AuthorizationServerConfig"></a>AuthorizationServerConfig</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">   <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">configure</span><span class="params">(ClientDetailsServiceConfigurer clients)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        clients.inMemory()</span><br><span class="line">                .withClient(<span class="string">"zuul"</span>)</span><br><span class="line">                .secret(<span class="keyword">new</span> BCryptPasswordEncoder().encode(<span class="string">"secret"</span>))</span><br><span class="line">                .scopes(<span class="string">"app"</span>)</span><br><span class="line">                .authorizedGrantTypes(<span class="string">"authorization_code"</span>, <span class="string">"password"</span>)</span><br><span class="line">                .redirectUris(<span class="string">"http://localhost:9110/login"</span>)</span><br><span class="line">        ;</span><br><span class="line"><span class="comment">//        clients.withClientDetails(new JdbcClientDetailsService(dataSource));</span></span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="UserController"><a href="#UserController" class="headerlink" title="UserController"></a>UserController</h3><p>这个函数可以为其他模块资源服务器提供校验</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="meta">@RequestMapping</span>(<span class="string">"/oauth2_token"</span>)</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">UserController</span> </span>&#123;</span><br><span class="line">    <span class="meta">@GetMapping</span>(<span class="string">"/current"</span>)</span><br><span class="line">    <span class="function"><span class="keyword">public</span> Principal <span class="title">user</span><span class="params">(Principal principal)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> principal;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="ResourceServerConfig"><a href="#ResourceServerConfig" class="headerlink" title="ResourceServerConfig"></a>ResourceServerConfig</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">configure</span><span class="params">(HttpSecurity http)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        http</span><br><span class="line"><span class="comment">//                antMatcher表示只能处理/oauth2_token的请求</span></span><br><span class="line">                .antMatcher(<span class="string">"/oauth2_token/**"</span>)</span><br><span class="line">                .authorizeRequests()</span><br><span class="line">                .anyRequest().authenticated()</span><br><span class="line">        ;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="application-yml"><a href="#application-yml" class="headerlink" title="application.yml"></a>application.yml</h3><p>添加了根地址，也就是每次访问这个服务都要加上 /oauth-server</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">server:</span><br><span class="line">  port: <span class="number">9120</span></span><br><span class="line">#  url根地址 不配置的话会报invalid_token错误</span><br><span class="line">#  或者在zuul中配置也可以</span><br><span class="line">  servlet:</span><br><span class="line">    context-path: /oauth-server</span><br></pre></td></tr></table></figure>
+
+<h2 id="Zuul"><a href="#Zuul" class="headerlink" title="Zuul"></a>Zuul</h2><p>zuul作为系统的入口，提供路由、统一授权等功能。</p>
+<p>依赖见项目中</p>
+<p><font color="red">注意：所有模块都引入了spring-cloud-starter-oauth2依赖，所以放入了项目的公共pom.xml中，实现oauth2只需要引用这一个就可以</font></p>
+<h3 id="application-yml-1"><a href="#application-yml-1" class="headerlink" title="application.yml"></a>application.yml</h3><p>贴出主要配置，详细见项目中</p>
+<p><code>sensitiveHeaders:</code>这个必须要。zuul在转发路由时，会改写request中的头部信息，设置成空就是不过滤</p>
+<p>security.oauth2.resource：这个是和解析令牌相关的配置</p>
+<p>资源服务器需要解析令牌验证正确性，方式有三种：</p>
+<ol>
+<li>如果令牌不是jwt非对称加密，那么访问/oauth/check_token直接验证token；<br>如果是非对称，访问/oauth/token_key获得公钥进行解析</li>
+<li>访问认证服务器中的controller中的方法，获得Principal进行验证</li>
+<li>在资源服务器本地配置，继承ResourceServerConfigurerAdapter接口，实现和认证服务器相同的加密方式</li>
+</ol>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">zuul:</span></span><br><span class="line">  <span class="attr">routes:</span></span><br><span class="line">    <span class="attr">eureka-client:</span></span><br><span class="line">      <span class="attr">path:</span> <span class="string">/eureka-client/**</span></span><br><span class="line">      <span class="attr">sensitiveHeaders:</span></span><br><span class="line">      <span class="attr">serviceId:</span> <span class="string">eureka-client</span></span><br><span class="line">    <span class="attr">eureka-client1:</span></span><br><span class="line">      <span class="attr">path:</span> <span class="string">/eureka-client1/**</span></span><br><span class="line">      <span class="attr">sensitiveHeaders:</span></span><br><span class="line">      <span class="attr">serviceId:</span> <span class="string">eureka-client1</span></span><br><span class="line">    <span class="attr">oauth-server:</span></span><br><span class="line">      <span class="attr">path:</span> <span class="string">/oauth-server/**</span></span><br><span class="line">      <span class="attr">sensitiveHeaders:</span></span><br><span class="line">        <span class="attr">serviceId:</span> <span class="string">eureka-client</span></span><br><span class="line"><span class="comment">#认证服务器地址</span></span><br><span class="line"><span class="attr">oauth-server:</span> <span class="string">http://localhost:9120/oauth-server</span></span><br><span class="line"><span class="attr">security:</span></span><br><span class="line">  <span class="attr">oauth2:</span></span><br><span class="line"><span class="comment">#   和认证服务器中的client设置对应  </span></span><br><span class="line">    <span class="attr">client:</span></span><br><span class="line">	  <span class="attr">client-id:</span> <span class="string">zuul</span></span><br><span class="line">      <span class="attr">client-secret:</span> <span class="string">secret</span></span><br><span class="line"><span class="comment">#	   获取令牌地址</span></span><br><span class="line">      <span class="attr">access-token-uri:</span> <span class="string">$&#123;oauth-server&#125;/oauth/token</span></span><br><span class="line"><span class="comment">#      认证地址</span></span><br><span class="line">      <span class="attr">user-authorization-uri:</span> <span class="string">$&#123;oauth-server&#125;/oauth/authorize</span></span><br><span class="line">    <span class="attr">resource:</span></span><br><span class="line"><span class="comment">#      进行令牌校验</span></span><br><span class="line"><span class="comment">#      一、访问controller获取Principal</span></span><br><span class="line"><span class="comment">#      user-info-uri: $&#123;oauth-server&#125;/oauth2_token/current</span></span><br><span class="line"><span class="comment">#      prefer-token-info: false</span></span><br><span class="line"><span class="comment">#      二、访问授权服务器获取公钥 解析令牌</span></span><br><span class="line">      <span class="attr">jwt:</span></span><br><span class="line">        <span class="attr">key-uri:</span> <span class="string">$&#123;oauth-server&#125;/oauth/token_key</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="配置WebSecurityConfig"><a href="#配置WebSecurityConfig" class="headerlink" title="配置WebSecurityConfig"></a>配置WebSecurityConfig</h3><p>整个zuul模块只要添加这一个配置就可以</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@EnableOAuth</span>2Sso</span><br><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="meta">@EnableWebSecurity</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">WebSecurityConfig</span> <span class="keyword">extends</span> <span class="title">WebSecurityConfigurerAdapter</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">configure</span><span class="params">(HttpSecurity http)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        http</span><br><span class="line">        <span class="comment">//需要授权的url    </span></span><br><span class="line">                .authorizeRequests()</span><br><span class="line">                .antMatchers(<span class="string">"/login"</span>).permitAll()</span><br><span class="line">                .anyRequest().authenticated()</span><br><span class="line">                .and().csrf().disable()</span><br><span class="line">        ;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="eureka-client（资源服务器）"><a href="#eureka-client（资源服务器）" class="headerlink" title="eureka-client（资源服务器）"></a>eureka-client（资源服务器）</h2><h3 id="application-yml-2"><a href="#application-yml-2" class="headerlink" title="application.yml"></a>application.yml</h3><p>新添如下，用于验证请求的令牌是否正确</p>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">security:</span></span><br><span class="line">  <span class="attr">oauth2:</span></span><br><span class="line">    <span class="attr">resource:</span></span><br><span class="line">      <span class="attr">id:</span> <span class="string">eureka-client</span></span><br><span class="line">      <span class="comment">#      资源服务器三种验证令牌方法</span></span><br><span class="line">      <span class="comment">#       一、在ResourceServerConfig中本地配置</span></span><br><span class="line">      <span class="comment">#      二、从认证服务器获取用户信息 解析出token</span></span><br><span class="line">      <span class="comment">#      user-info-uri: $&#123;oauth-server&#125;/oauth2_token/current</span></span><br><span class="line">      <span class="comment">#      prefer-token-info: false</span></span><br><span class="line">      <span class="comment">#       三、远程获取公钥 解析token</span></span><br><span class="line">      <span class="attr">jwt:</span></span><br><span class="line">        <span class="attr">key-uri:</span> <span class="string">$&#123;oauth-server&#125;/oauth/token_key</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="配置ResourceServerConfig"><a href="#配置ResourceServerConfig" class="headerlink" title="配置ResourceServerConfig"></a>配置ResourceServerConfig</h3><p>资源服务器只需要添加这一个配置即可</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="meta">@EnableResourceServer</span></span><br><span class="line"><span class="comment">//Spring Security默认禁用注解 这里开启注解</span></span><br><span class="line"><span class="comment">// 结合@PreAuthorize("hasRole('admin')")用来判断用户对某个控制层的方法是否有访问权限</span></span><br><span class="line"><span class="meta">@EnableGlobalMethodSecurity</span>(prePostEnabled = <span class="keyword">true</span>)</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ResourceServerConfig</span> <span class="keyword">extends</span> <span class="title">ResourceServerConfigurerAdapter</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">configure</span><span class="params">(HttpSecurity http)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        http</span><br><span class="line"><span class="comment">//                配置需要权限的url</span></span><br><span class="line">                .authorizeRequests()</span><br><span class="line">                .anyRequest().authenticated()</span><br><span class="line">                .and().csrf().disable();</span><br><span class="line">        ;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//以下就是验证令牌的本地方法 如果使用这种，将上述application.yml的配置注释掉，同时将oauth2.jks放入resources文件夹</span></span><br><span class="line"><span class="comment">//    @Override</span></span><br><span class="line"><span class="comment">//    public void configure(ResourceServerSecurityConfigurer resources) throws Exception &#123;</span></span><br><span class="line"><span class="comment">//        resources.resourceId("app").tokenStore(tokenStore());</span></span><br><span class="line"><span class="comment">//    &#125;</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">//    @Bean</span></span><br><span class="line"><span class="comment">//    public TokenStore tokenStore() &#123;</span></span><br><span class="line"><span class="comment">//        return new JwtTokenStore(jwtAccessTokenConverter());</span></span><br><span class="line"><span class="comment">//    &#125;</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">//    /**</span></span><br><span class="line"><span class="comment">//     * 非对称加密算法对token进行签名</span></span><br><span class="line"><span class="comment">//     *</span></span><br><span class="line"><span class="comment">//     * @return</span></span><br><span class="line"><span class="comment">//     */</span></span><br><span class="line"><span class="comment">//    @Bean</span></span><br><span class="line"><span class="comment">//    public JwtAccessTokenConverter jwtAccessTokenConverter() &#123;</span></span><br><span class="line"><span class="comment">//        final JwtAccessTokenConverter converter = new JwtAccessTokenConverter();</span></span><br><span class="line"><span class="comment">//        // 导入证书</span></span><br><span class="line"><span class="comment">//        KeyStoreKeyFactory keyStoreKeyFactory =</span></span><br><span class="line"><span class="comment">//                new KeyStoreKeyFactory(new ClassPathResource("oauth2.jks"), "mypass".toCharArray());</span></span><br><span class="line"><span class="comment">//        converter.setKeyPair(keyStoreKeyFactory.getKeyPair("oauth2"));</span></span><br><span class="line"><span class="comment">//        return converter;</span></span><br><span class="line"><span class="comment">//    &#125;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><font color="red">注意：</font></p>
+<p>如果使用本地验证方法，可能会报读取不到oauth2.jks的错误，因为默认不引用resources目录下的文件，需要在pom.xml中&lt;build&gt;下添加配置</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">resources</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">resource</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">directory</span>&gt;</span>src/main/resources<span class="tag">&lt;/<span class="name">directory</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">includes</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">include</span>&gt;</span>**/*.*<span class="tag">&lt;/<span class="name">include</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">includes</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">resource</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">resources</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h2><p>启动顺序：</p>
+<ul>
+<li>eureka-server-single</li>
+<li>oauth-server</li>
+<li>zuul</li>
+<li>eureka-client和eureka-ciient1</li>
+</ul>
+<p>通过zuul端口访问eureka-client下的方法 <a href="http://localhost:9110/eureka-client/hi" target="_blank" rel="noopener">http://localhost:9110/eureka-client/hi</a></p>
+<p>会自动跳到oauth-server的登陆页面，输入用户名和密码登陆</p>
+<img src="/2019/10/11/SpringCloud-OAuth2实现SSO/1570779345082.png">
+
+<p>看url，跳转到了oauth/authorize，这是授权接口，并且后面携带了一些zuul配置的信息</p>
+<img src="/2019/10/11/SpringCloud-OAuth2实现SSO/1570779361869.png">
+
+<p>成功</p>
+<img src="/2019/10/11/SpringCloud-OAuth2实现SSO/1570779411739.png">
+
+
+
+<p>访问eureka-client1不需要登陆</p>
+<img src="/2019/10/11/SpringCloud-OAuth2实现SSO/1570779295223.png">
+
+
+
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>写的比较简洁，但是做出来真的花费了两天的时间精力(还是太菜了)</p>
+<p>没有什么文采，原理性的东西也写不出来，只能记录一下实践，大家共同交流</p>
+
+    </div>
+
+    
+    
+    
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center;">
+  <img id="wechat_subscriber_qcode" src="/images/wechat-qcode.jpg" alt="zcs wechat" style="width: 200px; max-width: 100%;">
+  <div>微信扫一扫,手机也能看.</div>
+</div>
+
+      
+        
+      
+
+      <footer class="post-footer">
+          
+            
+          
+          <div class="post-tags">
+            
+              <a href="/tags/SpringCloud/" rel="tag"># SpringCloud</a>
+            
+          </div>
+        
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+              
+                <a href="/2019/10/07/SpringCloud-OAuth2和JWT/" rel="next" title="SpringCloud：OAuth2和JWT">
+                  <i class="fa fa-chevron-left"></i> SpringCloud：OAuth2和JWT
+                </a>
+              
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+              
+                <a href="/2019/11/09/SpringCloud打包docker/" rel="prev" title="SpringCloud打包docker">
+                  SpringCloud打包docker <i class="fa fa-chevron-right"></i>
+                </a>
+              
+            </div>
+          </div>
+        
+      </footer>
+    
+  </div>
+  
+  
+  
+  </article>
+
+  </div>
+
+
+          </div>
+          
+    
+    <div class="comments" id="comments"></div>
+  
+
+        </div>
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+        
+        
+        
+        
+      
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#什么是SSO"><span class="nav-number">2.</span> <span class="nav-text">什么是SSO</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#大体框架"><span class="nav-number">3.</span> <span class="nav-text">大体框架</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#oauth-server"><span class="nav-number">4.</span> <span class="nav-text">oauth-server</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#AuthorizationServerConfig"><span class="nav-number">4.1.</span> <span class="nav-text">AuthorizationServerConfig</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#UserController"><span class="nav-number">4.2.</span> <span class="nav-text">UserController</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ResourceServerConfig"><span class="nav-number">4.3.</span> <span class="nav-text">ResourceServerConfig</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#application-yml"><span class="nav-number">4.4.</span> <span class="nav-text">application.yml</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Zuul"><span class="nav-number">5.</span> <span class="nav-text">Zuul</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#application-yml-1"><span class="nav-number">5.1.</span> <span class="nav-text">application.yml</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置WebSecurityConfig"><span class="nav-number">5.2.</span> <span class="nav-text">配置WebSecurityConfig</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#eureka-client（资源服务器）"><span class="nav-number">6.</span> <span class="nav-text">eureka-client（资源服务器）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#application-yml-2"><span class="nav-number">6.1.</span> <span class="nav-text">application.yml</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置ResourceServerConfig"><span class="nav-number">6.2.</span> <span class="nav-text">配置ResourceServerConfig</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#测试"><span class="nav-number">7.</span> <span class="nav-text">测试</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">8.</span> <span class="nav-text">总结</span></a></li></ol></div>
+        
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image"
+      src="/images/avatar.jpg"
+      alt="zcs">
+  <p class="site-author-name" itemprop="name">zcs</p>
+  <div class="site-description" itemprop="description">记录学习java的艰辛历程</div>
+</div>
+  <nav class="site-state motion-element">
+      <div class="site-state-item site-state-posts">
+        
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">8</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+    
+      
+      
+      <div class="site-state-item site-state-categories">
+        
+          
+            <a href="/categories/">
+          
+        
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">分类</span>
+        </a>
+      </div>
+    
+      
+      
+      <div class="site-state-item site-state-tags">
+        
+          
+            <a href="/tags/">
+          
+        
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">标签</span>
+        </a>
+      </div>
+    
+  </nav>
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+      
+      
+        
+      
+      
+        
+      
+        <a href="https://github.com/zheyday" title="GitHub &rarr; https://github.com/zheyday" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+    
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2023</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">zcs</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.9.0</div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.4.0</div>
+
+        
+
+
+
+
+
+
+  
+  <script>
+  function leancloudSelector(url) {
+    return document.getElementById(url).querySelector('.leancloud-visitors-count');
+  }
+  if (CONFIG.page.isPost) {
+    function addCount(Counter) {
+      var visitors = document.querySelector('.leancloud_visitors');
+      var url = visitors.getAttribute('id').trim();
+      var title = visitors.getAttribute('data-flag-title').trim();
+
+      Counter('get', `/classes/Counter?where=${JSON.stringify({ url })}`)
+        .then(response => response.json())
+        .then(({ results }) => {
+          if (results.length > 0) {
+            var counter = results[0];
+              leancloudSelector(url).innerText = counter.time + 1;
+            
+            Counter('put', '/classes/Counter/' + counter.objectId, { time: { '__op': 'Increment', 'amount': 1 } })
+              .then(response => response.json())
+              .catch(error => {
+                console.log('Failed to save visitor count', error);
+              })
+          } else {
+              Counter('post', '/classes/Counter', { title: title, url: url, time: 1 })
+                .then(response => response.json())
+                .then(() => {
+                  leancloudSelector(url).innerText = 1;
+                })
+                .catch(error => {
+                  console.log('Failed to create', error);
+                });
+            
+          }
+        })
+        .catch(error => {
+          console.log('LeanCloud Counter Error', error);
+        });
+    }
+  } else {
+    function showTime(Counter) {
+      var visitors = document.querySelectorAll('.leancloud_visitors');
+      var entries = [...visitors].map(element => {
+        return element.getAttribute('id').trim();
+      });
+
+      Counter('get', `/classes/Counter?where=${JSON.stringify({ url: { '$in': entries } })}`)
+        .then(response => response.json())
+        .then(({ results }) => {
+          if (results.length === 0) {
+            document.querySelectorAll('.leancloud_visitors .leancloud-visitors-count').forEach(element => {
+              element.innerText = 0;
+            });
+            return;
+          }
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.url;
+            var time = item.time;
+            leancloudSelector(url).innerText = time;
+          }
+          for (var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = leancloudSelector(url);
+            if (element.innerText == '') {
+              element.innerText = 0;
+            }
+          }
+        })
+        .catch(error => {
+          console.log('LeanCloud Counter Error', error);
+        });
+    }
+  }
+
+  fetch('https://app-router.leancloud.cn/2/route?appId=IIXKGrLJnrYk9UQo8crDc3jY-gzGzoHsz')
+    .then(response => response.json())
+    .then(({ api_server }) => {
+      var Counter = (method, url, data) => {
+        return fetch(`https://${api_server}/1.1${url}`, {
+          method: method,
+          headers: {
+            'X-LC-Id': 'IIXKGrLJnrYk9UQo8crDc3jY-gzGzoHsz',
+            'X-LC-Key': '2aOR7cL96GJfJOK6WtoaDYgI',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data)
+        });
+      };
+      if (CONFIG.page.isPost) {
+        const localhost = /http:\/\/(localhost|127.0.0.1|0.0.0.0)/;
+        if (localhost.test(document.URL)) return;
+        addCount(Counter);
+      } else if (document.querySelectorAll('.post-title-link').length >= 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+
+
+  <script src="/lib/anime.min.js?v=3.1.0"></script>
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+<script src="/js/utils.js?v=7.4.0"></script><script src="/js/motion.js?v=7.4.0"></script>
+<script src="/js/schemes/pisces.js?v=7.4.0"></script>
+
+<script src="/js/next-boot.js?v=7.4.0"></script>
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+
+<script>
+NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+  var GUEST = ['nick', 'mail', 'link'];
+  var guest = 'nick,mail,link';
+  guest = guest.split(',').filter(item => {
+    return GUEST.includes(item);
+  });
+  new Valine({
+    el: '#comments',
+    verify: false,
+    notify: false,
+    appId: 'IIXKGrLJnrYk9UQo8crDc3jY-gzGzoHsz',
+    appKey: '2aOR7cL96GJfJOK6WtoaDYgI',
+    placeholder: '冲啊',
+    avatar: 'identicon',
+    meta: guest,
+    pageSize: '10' || 10,
+    visitor: false,
+    lang: '' || 'zh-cn',
+    path: location.pathname
+  });
+}, window.Valine);
+</script>
+
+</body>
+</html>
